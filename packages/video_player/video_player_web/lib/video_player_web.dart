@@ -163,4 +163,10 @@ class VideoPlayerPlugin extends VideoPlayerPlatform {
   /// Sets the audio mode to mix with other sources (ignored).
   @override
   Future<void> setMixWithOthers(bool mixWithOthers) => Future<void>.value();
+
+  /// Sets the video to picture-in-picture mode on web
+  @override
+  Future<dynamic> requestPictureInPicture(int playerId) async {
+    return _player(playerId).requestPictureInPicture();
+  }
 }

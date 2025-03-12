@@ -121,6 +121,12 @@ abstract class VideoPlayerPlatform extends PlatformInterface {
   Future<void> setWebOptions(int playerId, VideoPlayerWebOptions options) {
     throw UnimplementedError('setWebOptions() has not been implemented.');
   }
+
+  /// Requesting picture-in-picture mode on the web.
+  Future<dynamic> requestPictureInPicture(int playerId) async {
+    throw UnimplementedError(
+        'requestPictureInPicture() has not been implemented.');
+  }
 }
 
 class _PlaceholderImplementation extends VideoPlayerPlatform {}
@@ -322,6 +328,12 @@ enum VideoEventType {
   /// This event is fired when the video starts or pauses due to user actions or
   /// phone calls, or other app media such as music players.
   isPlayingStateUpdate,
+
+  ///The video started running in picture-in-picture format.
+  pictureInPictureStart,
+
+  ///The video stopped running in picture-in-picture format
+  pictureInPictureEnd,
 
   /// An unknown event has been received.
   unknown,

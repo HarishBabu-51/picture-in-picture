@@ -59,6 +59,7 @@ class VideoPlayerValue {
     this.rotationCorrection = 0,
     this.errorDescription,
     this.isCompleted = false,
+    this.isPictureInPicture = false,
   });
 
   /// Returns an instance for a video that hasn't been loaded.
@@ -133,6 +134,9 @@ class VideoPlayerValue {
   /// Indicates whether or not the video has been loaded and is ready to play.
   final bool isInitialized;
 
+  /// Indicates whether or not the video is in picture-in-picture format.
+  final bool isPictureInPicture;
+
   /// Indicates whether or not the video is in an error state. If this is true
   /// [errorDescription] should have information about the problem.
   bool get hasError => errorDescription != null;
@@ -172,6 +176,7 @@ class VideoPlayerValue {
     int? rotationCorrection,
     String? errorDescription = _defaultErrorDescription,
     bool? isCompleted,
+    bool? isPictureInPicture,
   }) {
     return VideoPlayerValue(
       duration: duration ?? this.duration,
@@ -191,6 +196,7 @@ class VideoPlayerValue {
           ? errorDescription
           : this.errorDescription,
       isCompleted: isCompleted ?? this.isCompleted,
+      isPictureInPicture: isPictureInPicture ?? this.isPictureInPicture,
     );
   }
 
@@ -232,7 +238,8 @@ class VideoPlayerValue {
           size == other.size &&
           rotationCorrection == other.rotationCorrection &&
           isInitialized == other.isInitialized &&
-          isCompleted == other.isCompleted;
+          isCompleted == other.isCompleted &&
+          isPictureInPicture == other.isPictureInPicture;
 
   @override
   int get hashCode => Object.hash(
@@ -251,6 +258,7 @@ class VideoPlayerValue {
         rotationCorrection,
         isInitialized,
         isCompleted,
+        isPictureInPicture,
       );
 }
 
@@ -498,6 +506,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
                 value.copyWith(isPlaying: event.isPlaying, isCompleted: false);
           } else {
             value = value.copyWith(isPlaying: event.isPlaying);
+          }
+        case VideoEventType.pictureInPictureStart:
+          {
+            value = value.copyWith(isPictureInPicture: true);
+            break;
+          }
+        case VideoEventType.pictureInPictureEnd:
+          {
+            value = value.copyWith(isPictureInPicture: false);
+            break;
           }
         case VideoEventType.unknown:
           break;
@@ -787,6 +805,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     if (!_isDisposed) {
       super.removeListener(listener);
     }
+  }
+
+  /// Requesting picture-in-picture format on the web
+  Future<dynamic> requestPictureInPicture() {
+    return _videoPlayerPlatform.requestPictureInPicture(_textureId);
   }
 
   bool get _isDisposedOrNotInitialized => _isDisposed || !value.isInitialized;

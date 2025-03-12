@@ -8,6 +8,7 @@
 /// video.
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -205,6 +206,9 @@ class _ButterFlyAssetVideoState extends State<_ButterFlyAssetVideo> {
   }
 }
 
+const String _bee =
+    'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4';
+
 class _BumbleBeeRemoteVideo extends StatefulWidget {
   @override
   _BumbleBeeRemoteVideoState createState() => _BumbleBeeRemoteVideoState();
@@ -224,13 +228,13 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(
-      Uri.parse(
-          'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4'),
+      Uri.parse(_bee),
       closedCaptionFile: _loadCaptions(),
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
 
     _controller.addListener(() {
+      debugPrint('Picture-in-picture ${_controller.value.isPictureInPicture}');
       setState(() {});
     });
     _controller.setLooping(true);
@@ -249,7 +253,20 @@ class _BumbleBeeRemoteVideoState extends State<_BumbleBeeRemoteVideo> {
       child: Column(
         children: <Widget>[
           Container(padding: const EdgeInsets.only(top: 20.0)),
-          const Text('With remote mp4'),
+          Row(
+            spacing: 15,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text('With remote mp4'),
+              if (kIsWeb)
+                ElevatedButton(
+                  onPressed: () {
+                    _controller.requestPictureInPicture();
+                  },
+                  child: const Text('Play picture-in-picture'),
+                )
+            ],
+          ),
           Container(
             padding: const EdgeInsets.all(20),
             child: AspectRatio(

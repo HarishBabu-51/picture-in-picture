@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
 import 'package:web/web.dart' as web;
+import 'package:web/helpers.dart';
 
 import 'duration_utils.dart';
 import 'pkg_web_tweaks.dart';
@@ -51,6 +52,7 @@ class VideoPlayer {
 
   bool _isInitialized = false;
   bool _isBuffering = false;
+  bool _isPictureInPicture = false;
 
   /// Returns the [Stream] of [VideoEvent]s from the inner [web.HTMLVideoElement].
   Stream<VideoEvent> get events => _eventController.stream;
@@ -131,6 +133,14 @@ class VideoPlayer {
     if (src != null) {
       _videoElement.src = src;
     }
+
+    _videoElement.onenterpictureinpicture = ((web.Event event) {
+      setPictureInPicture(true);
+    }).toJS;
+
+    _videoElement.onleavepictureinpicture = ((web.Event event) {
+      setPictureInPicture(false);
+    }).toJS;
   }
 
   /// Attempts to play the video.
@@ -334,6 +344,24 @@ class VideoPlayer {
     }
   }
 
+  ///Caches the current picture-in-picture mode state of the video.
+  ///
+  ///If the picture-in-picture mode state changes, this dispatches a new event
+  @visibleForTesting
+  void setPictureInPicture(bool pictureInPicture) {
+    if (_isPictureInPicture == pictureInPicture) {
+      return;
+    }
+    _isPictureInPicture = pictureInPicture;
+    _eventController.add(
+      VideoEvent(
+        eventType: _isPictureInPicture
+            ? VideoEventType.pictureInPictureStart
+            : VideoEventType.pictureInPictureEnd,
+      ),
+    );
+  }
+
   // Broadcasts the [web.HTMLVideoElement.buffered] status through the [events] stream.
   void _sendBufferingRangesUpdate() {
     _eventController.add(VideoEvent(
@@ -352,5 +380,10 @@ class VideoPlayer {
       ));
     }
     return durationRange;
+  }
+
+  /// Requesting picture-in-picture format on the web
+  Future<dynamic> requestPictureInPicture() async {
+    return _videoElement.requestPictureInPicture().toDart;
   }
 }
